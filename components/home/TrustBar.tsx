@@ -1,27 +1,26 @@
 import { ShieldCheck, Star, Users, Award } from 'lucide-react'
 
 const stats = [
-  { icon: ShieldCheck, label: 'Verified Consultants', value: '50+' },
-  { icon: Star, label: 'Proof-Backed Reviews', value: '1,200+' },
-  { icon: Users, label: 'Students Helped', value: '8,000+' },
-  { icon: Award, label: 'Years of Trust', value: 'Since 2024' },
+  { icon: ShieldCheck, value: '500+', label: 'Verified Consultants', color: '#818CF8' },
+  { icon: Star, value: '12,000+', label: 'Student Reviews', color: '#FF5A1F' },
+  { icon: Users, value: '8 States', label: 'Northeast Coverage', color: '#D4AF37' },
+  { icon: Award, value: '100% Free', label: 'For Students', color: '#22C55E' },
 ]
 
 export default function TrustBar() {
   return (
-    <div className="border-y" style={{ borderColor: 'var(--border)', background: 'var(--surface-1)' }}>
-      <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 gap-px"
-        style={{ background: 'var(--border)' }}>
-        {stats.map(({ icon: Icon, label, value }) => (
-          <div key={label} className="flex items-center gap-3 px-6 py-4"
-            style={{ background: 'var(--surface-1)' }}>
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'var(--accent-gold-muted)' }}>
-              <Icon size={16} style={{ color: 'var(--accent-gold)' }} />
+    <div style={{ background: 'var(--ti-surf)', borderTop: '1px solid var(--ti-border)', borderBottom: '1px solid var(--ti-border)' }}>
+      <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 divide-x"
+        style={{ '--tw-divide-opacity': 1, borderColor: 'var(--ti-border)' } as React.CSSProperties}>
+        {stats.map(({ icon: Icon, value, label, color }) => (
+          <div key={label} className="flex items-center gap-3 px-6 py-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: `${color}18` }}>
+              <Icon size={16} style={{ color }} />
             </div>
             <div>
-              <div className="text-lg font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{value}</div>
-              <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{label}</div>
+              <div className="font-display font-bold text-lg leading-none" style={{ color: 'var(--ti-text)' }}>{value}</div>
+              <div className="text-xs mt-0.5" style={{ color: 'var(--ti-muted)' }}>{label}</div>
             </div>
           </div>
         ))}

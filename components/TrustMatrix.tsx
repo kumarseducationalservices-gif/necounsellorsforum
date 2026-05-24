@@ -1,103 +1,59 @@
-import { CheckCircle2, XCircle, Shield, Building2, FileCheck, MapPin, Star, Award, Clock } from 'lucide-react'
+import { CheckCircle2, XCircle, Shield, Building2, FileCheck, MapPin, Star, Clock } from 'lucide-react'
 import { Consultant } from '@/lib/supabase'
 import { getYearsInOperation } from '@/lib/utils'
 
-interface Props {
-  consultant: Consultant
-}
-
-interface TrustRow {
-  label: string
-  status: boolean | string | number
-  icon: React.ElementType
-  type?: 'bool' | 'value'
-}
-
-export default function TrustMatrix({ consultant: c }: Props) {
+export default function TrustMatrix({ consultant: c }: { consultant: Consultant }) {
   const years = getYearsInOperation(c.established_year)
-
-  const rows: TrustRow[] = [
+  const rows = [
     { label: 'Google Business Verified', status: c.google_verified, icon: Shield, type: 'bool' },
-    { label: 'Trade License Verified', status: c.trade_license_verified, icon: FileCheck, type: 'bool' },
+    { label: 'Trade License Verified',   status: c.trade_license_verified, icon: FileCheck, type: 'bool' },
     { label: 'ROC Certificate Verified', status: c.roc_verified, icon: Building2, type: 'bool' },
-    { label: 'Office Address Verified', status: c.office_verified, icon: MapPin, type: 'bool' },
-    { label: 'Student Proof Reviews', status: c.student_proof_reviews, icon: Star, type: 'value' },
-    { label: 'Visa Success Reviews', status: c.visa_success_reviews, icon: CheckCircle2, type: 'value' },
-    { label: 'Years in Operation', status: years ? `${years} Years` : 'N/A', icon: Clock, type: 'value' },
+    { label: 'Office Address Verified',  status: c.office_verified, icon: MapPin, type: 'bool' },
+    { label: 'Student Proof Reviews',    status: c.student_proof_reviews, icon: Star, type: 'value' },
+    { label: 'Visa Success Reviews',     status: c.visa_success_reviews, icon: CheckCircle2, type: 'value' },
+    { label: 'Years in Operation',       status: years ? `${years} Yrs` : 'N/A', icon: Clock, type: 'value' },
   ]
-
-  const verifiedCount = [c.google_verified, c.trade_license_verified, c.roc_verified, c.office_verified].filter(Boolean).length
-  const trustScore = Math.round((verifiedCount / 4) * 60 + Math.min(c.total_reviews / 100, 1) * 40)
+  const boolVerified = [c.google_verified,c.trade_license_verified,c.roc_verified,c.office_verified].filter(Boolean).length
+  const score = Math.round((boolVerified/4)*60 + Math.min(c.total_reviews/100,1)*40)
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
-      {/* Header */}
-      <div className="px-6 py-4 flex items-center justify-between"
-        style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="px-5 py-4 flex items-center justify-between"
+        style={{ background: 'var(--gs-sage)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <div>
-          <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Trust Matrix</h3>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>Platform-verified parameters</p>
+          <h3 className="font-display font-bold text-sm text-white">Trust Matrix</h3>
+          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Platform-verified parameters</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold gradient-gold">{trustScore}%</div>
-          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Trust Score</div>
+          <div className="font-display font-extrabold text-2xl text-gold">{score}%</div>
+          <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Trust Score</div>
         </div>
       </div>
-
-      {/* Score bar */}
-      <div className="px-6 py-3" style={{ background: 'var(--surface-1)', borderBottom: '1px solid var(--border)' }}>
-        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface-3)' }}>
-          <div className="h-full rounded-full transition-all duration-700"
-            style={{
-              width: `${trustScore}%`,
-              background: trustScore >= 80
-                ? 'linear-gradient(90deg, #22C55E, #4ADE80)'
-                : trustScore >= 50
-                  ? 'linear-gradient(90deg, #E8A238, #F5C842)'
-                  : 'linear-gradient(90deg, #F87171, #FB923C)',
-            }} />
-        </div>
+      <div className="h-1.5" style={{ background: '#0d2820' }}>
+        <div className="h-full transition-all duration-700" style={{ width: `${score}%`,
+          background: score>=80 ? 'linear-gradient(90deg,#22C55E,#4ADE80)' : score>=50 ? 'linear-gradient(90deg,#D4AF37,#F0C757)' : '#F87171' }} />
       </div>
-
-      {/* Rows */}
-      <div style={{ background: 'var(--surface-1)' }}>
+      <div style={{ background: 'var(--gs-bg)' }}>
         {rows.map((row, i) => {
           const Icon = row.icon
-          const isBool = row.type === 'bool'
-          const boolVal = isBool ? (row.status as boolean) : null
-
           return (
-            <div key={row.label}
-              className="flex items-center justify-between px-6 py-3.5"
-              style={{
-                borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none',
-              }}>
+            <div key={row.label} className="flex items-center justify-between px-5 py-3.5"
+              style={{ borderBottom: i<rows.length-1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
               <div className="flex items-center gap-3">
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: 'var(--surface-2)' }}>
-                  <Icon size={13} style={{ color: 'var(--text-secondary)' }} />
+                  style={{ background: '#F3F4F6' }}>
+                  <Icon size={13} style={{ color: '#9CA3AF' }} />
                 </div>
-                <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{row.label}</span>
+                <span className="text-sm" style={{ color: '#6B7280' }}>{row.label}</span>
               </div>
-
-              {isBool ? (
+              {row.type === 'bool' ? (
                 <div className="flex items-center gap-1.5">
-                  {boolVal ? (
-                    <>
-                      <CheckCircle2 size={15} style={{ color: '#22C55E' }} />
-                      <span className="text-sm font-medium" style={{ color: '#22C55E' }}>Verified</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle size={15} style={{ color: 'var(--text-muted)' }} />
-                      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Not yet</span>
-                    </>
-                  )}
+                  {row.status
+                    ? <><CheckCircle2 size={15} style={{ color: '#22C55E' }} /><span className="text-sm font-semibold" style={{ color: '#22C55E' }}>Verified</span></>
+                    : <><XCircle size={15} style={{ color: '#D1D5DB' }} /><span className="text-sm" style={{ color: '#D1D5DB' }}>Not yet</span></>}
                 </div>
               ) : (
-                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {row.status}
-                </span>
+                <span className="text-sm font-bold" style={{ color: 'var(--gs-text)' }}>{row.status}</span>
               )}
             </div>
           )
