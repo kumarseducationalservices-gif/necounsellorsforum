@@ -28,7 +28,7 @@ export default function HeroSection() {
   }
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center overflow-hidden section-dark">
+    <section className="relative min-h-[100dvh] flex items-center overflow-hidden section-dark pt-16">
 
       {/* Animated gradient blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

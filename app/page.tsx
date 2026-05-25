@@ -4,7 +4,6 @@ import TrustBar from '@/components/home/TrustBar'
 import ConsultantRail from '@/components/home/ConsultantRail'
 import EventsRail from '@/components/home/EventsRail'
 import CommunitySection from '@/components/home/CommunitySection'
-import VerificationCTA from '@/components/home/VerificationCTA'
 
 async function getData() {
   const [{ data: featured }, { data: topRated }, { data: events }] = await Promise.all([
@@ -23,30 +22,33 @@ export default async function HomePage() {
   const { featured, topRated, events } = await getData()
   return (
     <div>
-      {/* MOOD 1 — Transparent Insider (dark) */}
+      {/* DARK — hero + rails */}
       <div className="section-dark">
         <HeroSection />
         <TrustBar />
-        <div className="max-w-7xl mx-auto px-4 py-12 space-y-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-14">
           {featured.length > 0 && (
-            <ConsultantRail title="Featured Consultants" subtitle="Handpicked, establishment-verified" consultants={featured} viewAllHref="/consultants?filter=featured" dark />
+            <ConsultantRail
+              title="Featured Consultants"
+              subtitle="Handpicked, establishment-verified advisors"
+              consultants={featured}
+              viewAllHref="/consultants?filter=featured"
+            />
           )}
           {events.length > 0 && <EventsRail events={events} />}
-        </div>
-      </div>
-
-      {/* MOOD 2 — Community Campus (warm) */}
-      <CommunitySection />
-
-      {/* MOOD 3 — Global Scholar (light) */}
-      <div className="section-light">
-        <div className="max-w-7xl mx-auto px-4 py-16 space-y-14">
           {topRated.length > 0 && (
-            <ConsultantRail title="Most Trusted This Month" subtitle="Highest-rated by verified students" consultants={topRated} viewAllHref="/consultants?sort=rating" />
+            <ConsultantRail
+              title="Most Trusted This Month"
+              subtitle="Highest-rated by verified student reviews"
+              consultants={topRated}
+              viewAllHref="/consultants?sort=rating"
+            />
           )}
-          <VerificationCTA />
         </div>
       </div>
+
+      {/* WARM — community reviews */}
+      <CommunitySection />
     </div>
   )
 }
