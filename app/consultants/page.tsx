@@ -25,7 +25,7 @@ export default async function ConsultantsPage({ searchParams }: { searchParams: 
   const consultants = await getConsultants(params)
 
   return (
-    <div className="pt-24 min-h-screen section-dark pb-20">
+    <div className="pt-24 min-h-screen  pb-20">
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-8">
           <h1 className="font-display font-extrabold text-4xl mb-2" style={{ color:'var(--ti-text)' }}>

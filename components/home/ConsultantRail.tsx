@@ -1,35 +1,19 @@
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 import { Consultant } from '@/lib/supabase'
 import ConsultantCard from '@/components/ConsultantCard'
 
-interface Props {
-  title: string
-  subtitle?: string
-  consultants: Consultant[]
-  viewAllHref: string
-}
+interface Props { title: string; consultants: Consultant[]; viewAllHref: string }
 
-export default function ConsultantRail({ title, subtitle, consultants, viewAllHref }: Props) {
+export default function ConsultantRail({ title, consultants, viewAllHref }: Props) {
+  if (!consultants.length) return null
   return (
-    <section>
-      <div className="flex items-end justify-between mb-5">
-        <div>
-          <h2 className="font-display font-bold text-2xl" style={{ color:'var(--ti-text)' }}>{title}</h2>
-          {subtitle && <p className="text-sm mt-1" style={{ color:'var(--ti-muted)' }}>{subtitle}</p>}
-        </div>
-        <Link href={viewAllHref}
-          className="flex items-center gap-1.5 text-sm font-semibold flex-shrink-0 ml-4"
-          style={{ color:'var(--ti-accent2)' }}>
-          View all <ArrowRight size={14} />
-        </Link>
+    <section className="px-4 py-5">
+      <div className="flex items-center justify-between mb-3 max-w-7xl mx-auto">
+        <h2 className="font-display font-bold text-lg" style={{ color:'var(--text)' }}>{title}</h2>
+        <Link href={viewAllHref} className="text-sm font-medium" style={{ color:'var(--indigo)' }}>See more</Link>
       </div>
-      <div className="scroll-rail">
-        {consultants.map(c => (
-          <div key={c.id} style={{ width:272, flexShrink:0 }}>
-            <ConsultantCard consultant={c} compact />
-          </div>
-        ))}
+      <div className="scroll-rail max-w-7xl mx-auto px-0">
+        {consultants.map(c => <ConsultantCard key={c.id} consultant={c} compact />)}
       </div>
     </section>
   )

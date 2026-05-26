@@ -1,112 +1,77 @@
-'use client'
-import { useRef, MouseEvent } from 'react'
 import Link from 'next/link'
-import { Star, MapPin, Award, CheckCircle2 } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { Consultant } from '@/lib/supabase'
 import { getInitials, getYearsInOperation } from '@/lib/utils'
 
 interface Props { consultant: Consultant; compact?: boolean }
 
-const LEVEL_CONFIG = {
-  establishment_verified: { label: 'Established & Verified', color: '#22C55E', cls: 'green' },
-  google_verified:        { label: 'Google Verified',        color: '#818CF8', cls: '' },
-  unverified:             { label: 'Unverified',             color: '#64748B', cls: '' },
+function Stars({ rating }: { rating: number }) {
+  const full = Math.floor(rating)
+  const half = rating % 1 >= 0.5
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({length:5}).map((_,i) => {
+        const filled = i < full || (i === full && half)
+        return (
+          <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={filled ? '#00875A' : '#E5E7EB'}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function ConsultantCard({ consultant: c, compact = false }: Props) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const years = getYearsInOperation(c.established_year)
-  const cfg = LEVEL_CONFIG[c.verification_level]
   const initials = getInitials(c.name)
-
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current
-    if (!el) return
-    const { left, top, width, height } = el.getBoundingClientRect()
-    const x = (e.clientX - left) / width - 0.5
-    const y = (e.clientY - top) / height - 0.5
-    el.style.transform = `perspective(600px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-3px)`
-  }
-  const handleMouseLeave = () => {
-    if (cardRef.current) cardRef.current.style.transform = ''
-  }
+  const years = getYearsInOperation(c.established_year)
+  const isVerified = c.verification_level === 'establishment_verified'
+  const isGoogle = c.verification_level === 'google_verified'
 
   return (
-    <Link href={`/consultants/${c.slug}`}>
-      <div ref={cardRef} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
-        className="tilt-card rounded-2xl overflow-hidden cursor-pointer"
-        style={{
-          background: 'var(--gs-bg)',
-          border: '1px solid rgba(0,0,0,0.08)',
-          boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-          minWidth: compact ? 260 : 'auto',
-          transition: 'box-shadow 0.25s',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.14)')}
-        onMouseOut={e => (e.currentTarget.style.boxShadow = '0 2px 16px rgba(0,0,0,0.06)')}>
+    <Link href={`/consultants/${c.slug}`}
+      className="tp-card block p-4 flex-shrink-0"
+      style={{ width: compact ? 220 : '100%', minWidth: compact ? 220 : undefined }}>
 
-        {/* Top band — Global Scholar moss/sage */}
-        <div className="h-20 relative flex items-end px-4 pb-0"
-          style={{ background: 'linear-gradient(135deg,#1E3A34,#2D5446)' }}>
-          <div className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: 'radial-gradient(circle at 30% 50%,#D4AF37,transparent 60%)' }} />
-          {c.is_featured && (
-            <span className="absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full font-semibold"
-              style={{ background: 'rgba(212,175,55,0.2)', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.3)' }}>
-              Featured
-            </span>
-          )}
-          {/* Avatar */}
-          <div className="relative -mb-7 w-14 h-14 rounded-2xl flex items-center justify-center font-display font-bold text-sm border-2"
-            style={{ background: 'linear-gradient(135deg,#D4AF37,#F0C757)', borderColor: 'var(--gs-bg)', color: '#1a1500' }}>
-            {c.logo_url ? <img src={c.logo_url} alt="" className="w-full h-full object-cover rounded-2xl" /> : initials}
-          </div>
+      {/* Logo + name row */}
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+          style={{ background: `linear-gradient(135deg, #4F46E5, #6D63FF)` }}>
+          {initials}
         </div>
-
-        {/* Body */}
-        <div className="p-4 pt-10">
-          <h3 className="font-display font-bold text-sm leading-snug mb-0.5" style={{ color: 'var(--gs-text)' }}>
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm leading-snug truncate" style={{ color:'var(--text)' }}>
             {c.name}
-          </h3>
-          {c.tagline && (
-            <p className="text-xs mb-3 line-clamp-2 leading-relaxed" style={{ color: '#6B7280' }}>{c.tagline}</p>
-          )}
-
-          {/* Badge */}
-          <span className={`badge-verified ${cfg.cls} mb-3`} style={{ color: cfg.color }}>
-            <CheckCircle2 size={11} />
-            {cfg.label}
-          </span>
-
-          {/* Stats */}
-          <div className="flex items-center gap-3 mt-3 text-xs" style={{ color: '#6B7280' }}>
-            <span className="flex items-center gap-1">
-              <Star size={11} className="fill-amber-400 text-amber-400" />
-              <strong style={{ color: 'var(--gs-text)' }}>{c.avg_rating.toFixed(1)}</strong>
-              <span>({c.total_reviews})</span>
-            </span>
-            <span className="flex items-center gap-1"><MapPin size={11} />{c.city}</span>
-            {years && <span className="flex items-center gap-1"><Award size={11} />{years}y</span>}
           </div>
-
-          {/* Countries */}
-          {c.countries_covered.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1">
-              {c.countries_covered.slice(0,4).map(co => (
-                <span key={co} className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'rgba(212,175,55,0.1)', color: '#B8960C', border: '1px solid rgba(212,175,55,0.2)' }}>
-                  {co}
-                </span>
-              ))}
-              {c.countries_covered.length > 4 && (
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: '#F3F4F6', color: '#9CA3AF' }}>
-                  +{c.countries_covered.length - 4}
-                </span>
-              )}
-            </div>
-          )}
+          <div className="text-xs truncate mt-0.5" style={{ color:'var(--muted)' }}>
+            {c.city}, {c.state}
+          </div>
         </div>
       </div>
+
+      {/* Stars + count */}
+      <div className="flex items-center gap-2 mb-2">
+        <Stars rating={c.avg_rating} />
+        <span className="text-xs font-bold" style={{ color:'var(--text)' }}>
+          {c.avg_rating > 0 ? c.avg_rating.toFixed(1) : 'New'}
+        </span>
+        {c.total_reviews > 0 && (
+          <span className="text-xs" style={{ color:'var(--muted)' }}>({c.total_reviews})</span>
+        )}
+      </div>
+
+      {/* Verified tag */}
+      {isVerified && (
+        <div className="flex items-center gap-1 text-xs font-medium" style={{ color:'#00875A' }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#00875A" strokeWidth="2.5">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          Established & Verified
+        </div>
+      )}
+      {isGoogle && (
+        <div className="text-xs" style={{ color:'#4F46E5' }}>Google Verified</div>
+      )}
     </Link>
   )
 }
