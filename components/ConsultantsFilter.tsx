@@ -1,177 +1,143 @@
 'use client'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
-import { SlidersHorizontal, X, ChevronDown } from 'lucide-react'
+import { useRouter, usePathname } from 'next/navigation'
+import { X, SlidersHorizontal } from 'lucide-react'
 
-const CITIES   = ['Guwahati','Shillong','Dibrugarh','Silchar','Imphal','Agartala','Aizawl','Jorhat','Tezpur']
-const COUNTRIES = ['UK','Canada','Australia','USA','Germany','Russia','Philippines','Bangladesh','France']
-const SPECS    = ['MBBS Abroad','Study Abroad','Scholarship','IELTS Coaching','SOP Writing']
+const VERIF = [
+  { v:'',         label:'All',                  color:'#374151' },
+  { v:'verified', label:'✓ Established',         color:'#00875A' },
+  { v:'featured', label:'★ Featured',            color:'#D97706' },
+]
+const CITIES = [
+  { v:'Guwahati',  flag:'🏙️' }, { v:'Dibrugarh', flag:'🌿' },
+  { v:'Silchar',   flag:'🌊' }, { v:'Shillong',  flag:'⛰️' },
+  { v:'Jorhat',    flag:'🍵' }, { v:'Tezpur',    flag:'🌸' },
+  { v:'Imphal',    flag:'🎭' }, { v:'Agartala',  flag:'🌺' },
+  { v:'Aizawl',   flag:'🏔️' },
+]
+const COUNTRIES = [
+  { v:'Canada',    flag:'🍁' }, { v:'UK',           flag:'🇬🇧' },
+  { v:'Australia', flag:'🇦🇺' }, { v:'Germany',      flag:'🇩🇪' },
+  { v:'Russia',    flag:'🇷🇺' }, { v:'Philippines',  flag:'🇵🇭' },
+  { v:'Bangladesh',flag:'🇧🇩' }, { v:'USA',          flag:'🇺🇸' },
+]
+const SPECS = ['MBBS Abroad','Study Abroad','IELTS Coaching','Scholarships','Canada','Germany','Nursing','Engineering Abroad']
+const SORT  = [{ v:'',label:'Best Match' },{ v:'rating',label:'Top Rated' },{ v:'reviews',label:'Most Reviewed' }]
 
-type Params = { q?:string; city?:string; state?:string; sort?:string; filter?:string; specialization?:string; country?:string }
+interface P { params: { q?:string; city?:string; filter?:string; sort?:string; specialization?:string; country?:string } }
 
-export default function ConsultantsFilter({ params }: { params: Params }) {
-  const router   = useRouter()
-  const path     = usePathname()
-  const [open, setOpen]   = useState(false)
+export default function ConsultantsFilter({ params }: P) {
+  const router = useRouter()
+  const path   = usePathname()
 
-  const push = (updates: Partial<Params>) => {
-    const merged = { ...params, ...updates }
+  const update = (key: string, value: string) => {
     const p = new URLSearchParams()
-    Object.entries(merged).forEach(([k,v]) => { if (v) p.set(k, String(v)) })
+    const merged = { ...params, [key]: value }
+    Object.entries(merged).forEach(([k,v]) => { if (v) p.set(k, v as string) })
+    if (!value) p.delete(key)
     router.push(`${path}?${p.toString()}`)
   }
 
-  const toggle = (key: keyof Params, val: string) =>
-    push({ [key]: params[key] === val ? '' : val })
+  const activeCount = [params.filter,params.city,params.sort,params.specialization,params.country].filter(Boolean).length
+  const clearAll = () => router.push(path + (params.q ? `?q=${params.q}` : ''))
 
-  const clear = () => router.push(path)
-
-  const hasFilters = !!(params.city || params.filter || params.specialization || params.country || params.sort)
-
-  // ── Pill helpers ──────────────────────────────────────────────────────────
-  const verPill = (val: string, label: string, color: string, bg: string, border: string) => {
-    const active = params.filter === val || (!params.filter && val === '')
-    return (
-      <button key={val} onClick={() => push({ filter: val === '' ? '' : val })}
-        className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-150"
-        style={{
-          background: active ? bg : 'white',
-          color: active ? color : '#6B7280',
-          border: `1.5px solid ${active ? border : '#E5E7EB'}`,
-          boxShadow: active ? `0 0 0 3px ${border}40` : 'none',
-        }}>
-        {label}
-      </button>
-    )
-  }
-
-  const cityPill = (city: string) => {
-    const active = params.city === city
-    return (
-      <button key={city} onClick={() => toggle('city', city)}
-        className="flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-150"
-        style={{
-          background: active ? '#FF5A1F' : 'white',
-          color: active ? 'white' : '#6B7280',
-          border: `1.5px solid ${active ? '#FF5A1F' : '#E5E7EB'}`,
-          boxShadow: active ? '0 0 0 3px rgba(255,90,31,0.2)' : 'none',
-        }}>
-        {city}
-      </button>
-    )
-  }
+  // Pill style factory
+  const pill = (active: boolean, color = '#374151', bg = '#F3F4F6') => ({
+    display: 'inline-flex', alignItems: 'center', gap: '5px',
+    padding: '6px 13px', borderRadius: 999, fontSize: 12, fontWeight: active ? 600 : 500,
+    cursor: 'pointer', border: `1.5px solid ${active ? color : '#E5E7EB'}`,
+    background: active ? color+'18' : '#FFFFFF',
+    color: active ? color : '#6B7280',
+    transition: 'all 0.15s', whiteSpace: 'nowrap' as const,
+    flexShrink: 0,
+    boxShadow: active ? `0 0 0 3px ${color}15` : '0 1px 2px rgba(0,0,0,0.05)',
+  })
 
   return (
-    <div className="sticky top-14 z-40 w-full"
-      style={{ background:'white', borderBottom:'1px solid #F3F4F6', boxShadow:'0 1px 4px rgba(0,0,0,0.06)' }}>
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="rounded-2xl overflow-hidden mb-6"
+      style={{ background:'#fff', border:'1px solid var(--border)', boxShadow:'0 1px 4px rgba(0,0,0,0.06)' }}>
 
-        {/* ── Row 1: Verification type + Sort + Filters btn ── */}
-        <div className="flex items-center gap-2 py-2.5 overflow-x-auto"
-          style={{ scrollbarWidth:'none' }}>
-
-          {verPill('',              'All',                    '#374151', '#F9FAFB',  '#D1D5DB')}
-          {verPill('verified',      'Established & Verified', '#065F46', '#D1FAE5',  '#6EE7B7')}
-          {verPill('google_verified','Google Verified',        '#4338CA', '#EEF2FF',  '#C7D2FE')}
-          {verPill('featured',      '★ Featured',              '#92400E', '#FEF3C7',  '#FCD34D')}
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Sort dropdown */}
-          <div className="relative flex-shrink-0">
-            <select
-              value={params.sort || ''}
-              onChange={e => push({ sort: e.target.value })}
-              className="appearance-none text-xs font-medium pl-3 pr-7 py-1.5 rounded-full border cursor-pointer outline-none"
-              style={{ background:'white', border:'1.5px solid #E5E7EB', color:'#374151' }}>
-              <option value="">Best Match</option>
-              <option value="rating">Highest Rated</option>
-              <option value="reviews">Most Reviewed</option>
-            </select>
-            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color:'#9CA3AF' }} />
-          </div>
-
-          {/* Filters toggle */}
-          <button onClick={() => setOpen(!open)}
-            className="flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all"
-            style={{
-              background: open || hasFilters ? '#4F46E5' : 'white',
-              color:       open || hasFilters ? 'white'   : '#374151',
-              border:      `1.5px solid ${open || hasFilters ? '#4F46E5' : '#E5E7EB'}`,
-            }}>
-            <SlidersHorizontal size={12} />
-            Filters
-            {hasFilters && (
-              <span className="w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold"
-                style={{ background:'white', color:'#4F46E5' }}>
-                {[params.city,params.filter,params.specialization,params.country,params.sort].filter(Boolean).length}
-              </span>
-            )}
-          </button>
-
-          {/* Clear all */}
-          {hasFilters && (
-            <button onClick={clear}
-              className="flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-full border"
-              style={{ color:'#DC2626', borderColor:'#FECACA', background:'#FEF2F2' }}>
-              <X size={11} /> Clear
-            </button>
+      {/* Header row */}
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor:'var(--border)' }}>
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal size={15} style={{ color:'var(--muted)' }} />
+          <span className="text-sm font-semibold" style={{ color:'var(--text)' }}>Filter by</span>
+          {activeCount > 0 && (
+            <span className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+              style={{ background:'#4F46E5', color:'white', minWidth:18, textAlign:'center' }}>
+              {activeCount}
+            </span>
           )}
         </div>
+        {activeCount > 0 && (
+          <button onClick={clearAll}
+            className="flex items-center gap-1 text-xs font-medium transition-opacity hover:opacity-70"
+            style={{ color:'#DC2626' }}>
+            <X size={12} /> Clear all
+          </button>
+        )}
+      </div>
 
-        {/* ── Row 2: City pills — always visible ── */}
-        <div className="flex gap-1.5 pb-2.5 overflow-x-auto" style={{ scrollbarWidth:'none' }}>
-          {CITIES.map(cityPill)}
+      <div className="p-4 space-y-4">
+        {/* Sort */}
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color:'var(--muted)' }}>Sort by</div>
+          <div className="flex gap-2 flex-wrap">
+            {SORT.map(s => (
+              <button key={s.v} style={pill(!params.sort && s.v==='' || params.sort===s.v, '#4F46E5')}
+                onClick={() => update('sort', s.v)}>{s.label}</button>
+            ))}
+          </div>
         </div>
 
-        {/* ── Expanded panel ── */}
-        {open && (
-          <div className="pb-4 border-t pt-3" style={{ borderColor:'#F3F4F6' }}>
-
-            {/* Country */}
-            <div className="mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color:'#9CA3AF' }}>Destination Country</p>
-              <div className="flex flex-wrap gap-1.5">
-                {COUNTRIES.map(ct => {
-                  const active = params.country === ct
-                  return (
-                    <button key={ct} onClick={() => toggle('country', ct)}
-                      className="text-xs font-medium px-2.5 py-1 rounded-full transition-all"
-                      style={{
-                        background: active ? '#1D4ED8' : '#F1F5F9',
-                        color:      active ? 'white'   : '#374151',
-                        border:    `1.5px solid ${active ? '#1D4ED8' : '#E2E8F0'}`,
-                      }}>
-                      {ct}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Specialization */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color:'#9CA3AF' }}>Specialization</p>
-              <div className="flex flex-wrap gap-1.5">
-                {SPECS.map(s => {
-                  const active = params.specialization === s
-                  return (
-                    <button key={s} onClick={() => toggle('specialization', s)}
-                      className="text-xs font-medium px-2.5 py-1 rounded-full transition-all"
-                      style={{
-                        background: active ? '#D4AF37' : '#F1F5F9',
-                        color:      active ? 'white'   : '#374151',
-                        border:    `1.5px solid ${active ? '#D4AF37' : '#E2E8F0'}`,
-                      }}>
-                      {s}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+        {/* Verification */}
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color:'var(--muted)' }}>Status</div>
+          <div className="flex gap-2 flex-wrap">
+            {VERIF.map(f => (
+              <button key={f.v} style={pill(!params.filter && f.v==='' || params.filter===f.v, f.color)}
+                onClick={() => update('filter', f.v)}>{f.label}</button>
+            ))}
           </div>
-        )}
+        </div>
+
+        {/* Cities — horizontal scroll */}
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color:'var(--muted)' }}>City</div>
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth:'none' }}>
+            {CITIES.map(c => (
+              <button key={c.v} style={pill(params.city===c.v, '#FF5A1F')}
+                onClick={() => update('city', params.city===c.v ? '' : c.v)}>
+                {c.flag} {c.v}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Countries */}
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color:'var(--muted)' }}>Country</div>
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth:'none' }}>
+            {COUNTRIES.map(c => (
+              <button key={c.v} style={pill(params.country===c.v, '#0891B2')}
+                onClick={() => update('country', params.country===c.v ? '' : c.v)}>
+                {c.flag} {c.v}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Specialization */}
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color:'var(--muted)' }}>Specialization</div>
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth:'none' }}>
+            {SPECS.map(s => (
+              <button key={s} style={pill(params.specialization===s, '#7C3AED')}
+                onClick={() => update('specialization', params.specialization===s ? '' : s)}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

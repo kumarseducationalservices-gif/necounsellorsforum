@@ -143,3 +143,9 @@ body {
 .section-cream { background: #FDFCF7; }
 .section-indigo-soft { background: #EEF2FF; }
 .section-green-soft { background: #E6F5F0; }
+
+/* Card name hover */
+.group:hover .group-hover\:text-indigo-600 { color: #4F46E5 !important; }
+
+/* Muted light */
+.text-muted-light { color: var(--muted-light); }
