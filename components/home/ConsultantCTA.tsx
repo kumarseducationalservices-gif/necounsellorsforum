@@ -1,29 +1,51 @@
-// "Looking to grow your business?" — Trustpilot's business CTA card
+'use client'
+import { motion } from 'framer-motion'
+import ScrollReveal from '@/components/ScrollReveal'
+
 export default function ConsultantCTA() {
   return (
-    <section className="px-4 py-3">
-      <div className="max-w-7xl mx-auto">
-        <div className="relative rounded-2xl overflow-hidden p-6 flex flex-col items-center text-center"
-          style={{ background:'linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%)', border:'1px solid #C7D2FE' }}>
+    <ScrollReveal from="bottom" delay={0.1}>
+      <section style={{ padding:'8px 16px' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
+          <motion.div
+            whileHover={{ scale:1.01 }}
+            transition={{ type:'spring', stiffness:300, damping:25 }}
+            style={{ position:'relative', borderRadius:20, overflow:'hidden', padding:'28px 24px',
+              display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center',
+              background:'linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%)',
+              border:'1px solid #C7D2FE' }}>
 
-          {/* Background bar chart illustration (like Trustpilot) */}
-          <div className="absolute bottom-0 right-4 flex items-end gap-1.5 opacity-20 pointer-events-none">
-            {[24,40,32,56,44,64,52].map((h,i) => (
-              <div key={i} className="rounded-t-sm" style={{ width:18, height:h, background:'#4F46E5' }} />
-            ))}
-          </div>
+            {/* Animated bar chart illustration */}
+            <div style={{ position:'absolute', bottom:0, right:16, display:'flex', alignItems:'flex-end',
+              gap:5, opacity:0.18, pointerEvents:'none' }}>
+              {[20,36,28,52,40,60,48].map((h,i) => (
+                <motion.div key={i}
+                  initial={{ scaleY:0 }} whileInView={{ scaleY:1 }}
+                  viewport={{ once:true }} transition={{ delay: i * 0.08, duration:0.5, ease:'backOut' }}
+                  style={{ width:16, height:h, background:'#4F46E5', borderRadius:'4px 4px 0 0',
+                    transformOrigin:'bottom' }} />
+              ))}
+            </div>
 
-          <h3 className="font-display font-bold text-lg mb-1 relative z-10" style={{ color:'var(--text)' }}>
-            Looking to grow your consultancy?
-          </h3>
-          <p className="text-sm mb-4 max-w-xs relative z-10" style={{ color:'var(--muted)' }}>
-            Strengthen your reputation with verified reviews on NECF.
-          </p>
-          <a href="/consultants/claim" className="btn-dark relative z-10" style={{ borderRadius:8 }}>
-            Get listed free
-          </a>
+            <h3 style={{ fontFamily:'Syne,sans-serif', fontWeight:700, fontSize:18,
+              color:'#1E1B4B', marginBottom:6, position:'relative', zIndex:1 }}>
+              Looking to grow your consultancy?
+            </h3>
+            <p style={{ fontSize:13, color:'#4338CA', marginBottom:20, maxWidth:280,
+              lineHeight:1.5, position:'relative', zIndex:1 }}>
+              Strengthen your reputation with verified reviews on NECF.
+            </p>
+            <motion.a href="/consultants/claim"
+              whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}
+              style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'11px 22px',
+                borderRadius:999, background:'#1E1B4B', color:'white', fontWeight:700,
+                fontSize:13, textDecoration:'none', zIndex:1, position:'relative',
+                boxShadow:'0 4px 14px rgba(79,70,229,0.35)' }}>
+              Get listed free
+            </motion.a>
+          </motion.div>
         </div>
-      </div>
-    </section>
+      </section>
+    </ScrollReveal>
   )
 }

@@ -1,20 +1,31 @@
-// "We're Trustpilot" style — "We're NECF" card
+'use client'
+import { motion } from 'framer-motion'
+import ScrollReveal from '@/components/ScrollReveal'
+
 export default function WhatWeDoCard() {
   return (
-    <section className="px-4 py-3">
-      <div className="max-w-7xl mx-auto">
-        <div className="rounded-2xl p-6 text-center" style={{ background:'#E6F5F0', border:'1px solid #B2DFDB' }}>
-          <h3 className="font-display font-bold text-xl mb-2" style={{ color:'#004D40' }}>
-            We&apos;re NECF
-          </h3>
-          <p className="text-sm mb-1 max-w-sm mx-auto leading-relaxed" style={{ color:'#00695C' }}>
-            We&apos;re a review platform that&apos;s open to everyone. Our vision is to become the universal symbol of trust for education consultants in Northeast India — by empowering students to choose with confidence, and helping honest consultants grow.
-          </p>
-          <button className="mt-4 text-sm font-semibold underline underline-offset-2" style={{ color:'#00695C' }}>
-            What we do
-          </button>
+    <ScrollReveal from="bottom">
+      <section style={{ padding:'8px 16px' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto' }}>
+          <motion.div
+            whileHover={{ scale:1.005 }}
+            style={{ borderRadius:20, padding:'28px 24px', textAlign:'center',
+              background:'linear-gradient(135deg,#E6F5F0,#D1FAE5)',
+              border:'1px solid #A7F3D0' }}>
+            <h3 style={{ fontFamily:'Syne,sans-serif', fontWeight:700, fontSize:20,
+              color:'#064E3B', marginBottom:10 }}>We&apos;re NECF</h3>
+            <p style={{ fontSize:13.5, color:'#065F46', lineHeight:1.6, maxWidth:440,
+              margin:'0 auto 16px' }}>
+              We&apos;re a review platform that&apos;s open to everyone. Our vision is to become the universal symbol of trust for education consultants in Northeast India — empowering students to choose with confidence.
+            </p>
+            <motion.button whileHover={{ scale:1.05 }} whileTap={{ scale:0.97 }}
+              style={{ fontSize:13, fontWeight:600, color:'#065F46', background:'none',
+                border:'none', cursor:'pointer', textDecoration:'underline', textUnderlineOffset:3 }}>
+              What we do →
+            </motion.button>
+          </motion.div>
         </div>
-      </div>
-    </section>
+      </section>
+    </ScrollReveal>
   )
 }
